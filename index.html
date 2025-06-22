@@ -525,7 +525,7 @@
                 return;
             }
 
-            grid.innerHTML = posts.map(post => {
+            grid.innerHTML = posts.map((post, index) => {
                 // Construct image URL more carefully
                 let imageUrl = '';
                 if (post.images && post.images.length > 0) {
@@ -535,9 +535,10 @@
                 }
                 
                 const additionalImages = post.images && post.images.length > 1 
-                    ? post.images.slice(1).map(img => {
+                    ? post.images.slice(1).map((img, imgIndex) => {
                         const imgUrl = `${IMAGE_BASE}/${img}`;
-                        return `<img src="${imgUrl}" alt="Additional image" class="gallery-image" onclick="openModal('${imgUrl}')" onerror="this.style.display='none'">`;
+                        const galleryId = `gallery-${index}-${imgIndex}`;
+                        return `<img src="${imgUrl}" alt="Additional image" class="gallery-image" data-image-url="${imgUrl}" id="${galleryId}">`;
                     }).join('') 
                     : '';
 
@@ -547,17 +548,20 @@
                     year: 'numeric'
                 });
 
+                const mainImageId = `main-image-${index}`;
+                const noImagePlaceholder = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #999; font-size: 3rem;">
+                        📷
+                    </div>
+                `;
+
                 return `
                     <div class="post-card">
                         <div class="image-container">
                             ${imageUrl ? `
-                                <img src="${imageUrl}" alt="Post image" class="post-image" onclick="openModal('${imageUrl}')" onerror="this.parentElement.innerHTML='<div style=\\'display: flex; align-items: center; justify-content: center; height: 100%; color: #999; font-size: 3rem;\\'>📷</div>'">
+                                <img src="${imageUrl}" alt="Post image" class="post-image" data-image-url="${imageUrl}" id="${mainImageId}">
                                 <div class="image-overlay"></div>
-                            ` : `
-                                <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #999; font-size: 3rem;">
-                                    📷
-                                </div>
-                            `}
+                            ` : noImagePlaceholder}
                             <div class="view-count">
                                 👁️ ${post.view || 0}
                             </div>
@@ -581,6 +585,45 @@
                     </div>
                 `;
             }).join('');
+
+            // Add click event listeners after HTML is created
+            setTimeout(() => {
+                addImageClickListeners();
+            }, 100);
+        }
+
+        function addImageClickListeners() {
+            // Add listeners for main images
+            document.querySelectorAll('.post-image[data-image-url]').forEach(img => {
+                img.addEventListener('click', function() {
+                    const imageUrl = this.getAttribute('data-image-url');
+                    console.log('Clicking main image:', imageUrl);
+                    openModal(imageUrl);
+                });
+                
+                img.addEventListener('error', function() {
+                    console.log('Image failed to load:', this.src);
+                    this.parentElement.innerHTML = `
+                        <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #999; font-size: 3rem;">
+                            📷
+                        </div>
+                    `;
+                });
+            });
+
+            // Add listeners for gallery images
+            document.querySelectorAll('.gallery-image[data-image-url]').forEach(img => {
+                img.addEventListener('click', function() {
+                    const imageUrl = this.getAttribute('data-image-url');
+                    console.log('Clicking gallery image:', imageUrl);
+                    openModal(imageUrl);
+                });
+                
+                img.addEventListener('error', function() {
+                    console.log('Gallery image failed to load:', this.src);
+                    this.style.display = 'none';
+                });
+            });
         }
 
         function updateStats() {
