@@ -481,8 +481,7 @@
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
-                    },
-                    mode: 'cors' // Add CORS mode
+                    }
                 });
                 
                 console.log(`Response status: ${response.status}`);
@@ -493,30 +492,6 @@
                 
                 const data = await response.json();
                 console.log('API Response:', data);
-                console.log('Number of items:', data.items ? data.items.length : 0);
-                
-                // Check if any items have images
-                if (data.items && data.items.length > 0) {
-                    data.items.forEach((item, index) => {
-                        console.log(`Item ${index}:`, {
-                            id: item._id,
-                            images: item.images,
-                            description: item.description?.substring(0, 50) + '...'
-                        });
-                        
-                        // Test image URL construction
-                        if (item.images && item.images.length > 0) {
-                            const testUrl = `${IMAGE_BASE}/${item.images[0]}`;
-                            console.log(`Test image URL for item ${index}:`, testUrl);
-                            
-                            // Actually test if the image exists
-                            const img = new Image();
-                            img.onload = () => console.log(`✅ Image exists: ${testUrl}`);
-                            img.onerror = () => console.log(`❌ Image NOT found: ${testUrl}`);
-                            img.src = testUrl;
-                        }
-                    });
-                }
                 
                 allPosts = data.items || [];
                 filteredPosts = [...allPosts];
@@ -551,23 +526,18 @@
             }
 
             grid.innerHTML = posts.map(post => {
-                // Debug log the post data
-                console.log('Post data:', post);
-                
-                // Construct image URL based on the actual API response format
+                // Construct image URL more carefully
                 let imageUrl = '';
                 if (post.images && post.images.length > 0) {
                     const imagePath = post.images[0];
-                    // The image path from API already includes the folder structure
-                    // Example: "95a84733138408ddbf8fb40cfd38daf5/lpryvga51s2unif8xk679ow4b.jpg"
                     imageUrl = `${IMAGE_BASE}/${imagePath}`;
-                    console.log('Constructed image URL:', imageUrl);
+                    console.log('Image URL:', imageUrl);
                 }
                 
                 const additionalImages = post.images && post.images.length > 1 
                     ? post.images.slice(1).map(img => {
                         const imgUrl = `${IMAGE_BASE}/${img}`;
-                        return `<img src="${imgUrl}" alt="Additional image" class="gallery-image" onclick="openModal('${imgUrl}')" onerror="this.style.display='none'" onload="console.log('Gallery image loaded:', '${imgUrl}')">`;
+                        return `<img src="${imgUrl}" alt="Additional image" class="gallery-image" onclick="openModal('${imgUrl}')" onerror="this.style.display='none'">`;
                     }).join('') 
                     : '';
 
@@ -577,29 +547,15 @@
                     year: 'numeric'
                 });
 
-                // Create a test function to check if image loads
-                const testImageLoad = `
-                    const img = new Image();
-                    img.onload = () => console.log('Image loaded successfully:', '${imageUrl}');
-                    img.onerror = () => console.error('Image failed to load:', '${imageUrl}');
-                    img.src = '${imageUrl}';
-                `;
-
                 return `
                     <div class="post-card">
                         <div class="image-container">
                             ${imageUrl ? `
-                                <img src="${imageUrl}" 
-                                     alt="Post image" 
-                                     class="post-image" 
-                                     onclick="openModal('${imageUrl}')" 
-                                     onload="console.log('Main image loaded:', this.src)"
-                                     onerror="console.error('Main image failed:', this.src); this.parentElement.innerHTML='<div style=\\'display: flex; align-items: center; justify-content: center; height: 100%; color: #999; font-size: 3rem; flex-direction: column;\\'>📷<br><small style=\\'font-size: 0.8rem; margin-top: 10px;\\'>Image not available</small></div>'">
+                                <img src="${imageUrl}" alt="Post image" class="post-image" onclick="openModal('${imageUrl}')" onerror="this.parentElement.innerHTML='<div style=\\'display: flex; align-items: center; justify-content: center; height: 100%; color: #999; font-size: 3rem;\\'>📷</div>'">
                                 <div class="image-overlay"></div>
-                                <script>${testImageLoad}</script>
                             ` : `
-                                <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #999; font-size: 3rem; flex-direction: column;">
-                                    📷<br><small style="font-size: 0.8rem; margin-top: 10px;">No image</small>
+                                <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #999; font-size: 3rem;">
+                                    📷
                                 </div>
                             `}
                             <div class="view-count">
@@ -620,9 +576,6 @@
                                     📍 ${post.location || 'Unknown location'}
                                 </div>
                                 <div class="date">${date}</div>
-                                <div style="font-size: 0.7rem; color: #999; margin-top: 5px;">
-                                    Debug: ${imageUrl ? 'Has image URL' : 'No image URL'}
-                                </div>
                             </div>
                         </div>
                     </div>
