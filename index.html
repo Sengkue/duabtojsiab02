@@ -351,40 +351,216 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            max-width: 95vw;
+            max-height: 95vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
         }
 
-        .modal-content {
-            max-width: 90%;
-            max-height: 90%;
-            border-radius: 10px;
+        .image-viewer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             position: relative;
+            max-width: 90vw;
+            max-height: 80vh;
         }
 
-        .modal img {
-            width: 100%;
-            height: 100%;
+        .main-image-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .modal-main-image {
+            max-width: 85vw;
+            max-height: 75vh;
             object-fit: contain;
             border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         }
 
-        .close-modal {
+        .nav-btn {
             position: absolute;
-            top: -40px;
-            right: 0;
-            background: white;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.9);
             border: none;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             font-size: 1.5rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .nav-btn:hover {
+            background: white;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: translateY(-50%);
+        }
+
+        .prev-btn {
+            left: -70px;
+        }
+
+        .next-btn {
+            right: -70px;
+        }
+
+        .image-info {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .image-counter {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        .image-description {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .thumbnail-strip {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 2rem;
+            max-width: 90vw;
+            overflow-x: auto;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .thumbnail {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .thumbnail:hover {
+            transform: scale(1.1);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .thumbnail.active {
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: -60px;
+            right: -10px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            color: #333;
+            font-weight: bold;
+            z-index: 20;
+        }
+
+        .close-modal:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+
+        .post-image {
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .post-image:hover {
+            transform: scale(1.05);
+        }
+
+        .gallery-image {
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .gallery-image:hover {
+            transform: scale(1.15);
+            z-index: 10;
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            .nav-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+            
+            .prev-btn {
+                left: -50px;
+            }
+            
+            .next-btn {
+                right: -50px;
+            }
+            
+            .modal-main-image {
+                max-width: 95vw;
+                max-height: 70vh;
+            }
+            
+            .thumbnail-strip {
+                max-width: 95vw;
+            }
         }
     </style>
 </head>
@@ -444,12 +620,23 @@
     <div class="modal" id="imageModal">
         <div class="modal-content">
             <button class="close-modal" onclick="closeModal()">✕</button>
-            <img id="modalImage" src="" alt="">
+            <div class="image-viewer">
+                <button class="nav-btn prev-btn" id="modalPrevBtn" onclick="changeModalImage(-1)">❮</button>
+                <div class="main-image-container">
+                    <img id="modalImage" src="" alt="" class="modal-main-image">
+                    <div class="image-info">
+                        <div class="image-counter" id="imageCounter">1 / 1</div>
+                        <div class="image-description" id="imageDescription"></div>
+                    </div>
+                </div>
+                <button class="nav-btn next-btn" id="modalNextBtn" onclick="changeModalImage(1)">❯</button>
+            </div>
+            <div class="thumbnail-strip" id="thumbnailStrip"></div>
         </div>
     </div>
 
     <script>
-        let currentPage = 0;
+        let currentPage = 1;
         let allPosts = [];
         let filteredPosts = [];
 
@@ -462,11 +649,11 @@
             if (pageNumber !== null) {
                 currentPage = pageNumber;
             } else {
-                currentPage = parseInt(pageInput.value) || 1;
+                currentPage = parseInt(pageInput.value) || 0;
             }
             
-            // Ensure page is at least 1
-            if (currentPage < 1) currentPage = 1;
+            // Allow page 0 and above
+            if (currentPage < 0) currentPage = 0;
             
             showLoading();
             hideError();
@@ -593,35 +780,63 @@
         }
 
         function addImageClickListeners() {
-            // Add listeners for main images
-            document.querySelectorAll('.post-image[data-image-url]').forEach(img => {
-                img.addEventListener('click', function() {
-                    const imageUrl = this.getAttribute('data-image-url');
-                    console.log('Clicking main image:', imageUrl);
-                    openModal(imageUrl);
+            // Add listeners for main images and entire post cards
+            document.querySelectorAll('.post-card').forEach((card, postIndex) => {
+                const mainImage = card.querySelector('.post-image[data-image-url]');
+                const galleryImages = card.querySelectorAll('.gallery-image[data-image-url]');
+                const description = card.querySelector('.post-description')?.textContent || '';
+                
+                // Collect all images for this post
+                let allPostImages = [];
+                if (mainImage) {
+                    allPostImages.push(mainImage.getAttribute('data-image-url'));
+                }
+                galleryImages.forEach(img => {
+                    allPostImages.push(img.getAttribute('data-image-url'));
                 });
                 
-                img.addEventListener('error', function() {
-                    console.log('Image failed to load:', this.src);
-                    this.parentElement.innerHTML = `
-                        <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #999; font-size: 3rem;">
-                            📷
-                        </div>
-                    `;
-                });
-            });
+                // Main image click
+                if (mainImage) {
+                    mainImage.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        console.log('Clicking main image for post', postIndex);
+                        openModal(allPostImages[0], allPostImages, description, 0);
+                    });
+                    
+                    mainImage.addEventListener('error', function() {
+                        console.log('Image failed to load:', this.src);
+                        this.parentElement.innerHTML = `
+                            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #999; font-size: 3rem;">
+                                📷
+                            </div>
+                        `;
+                    });
+                }
 
-            // Add listeners for gallery images
-            document.querySelectorAll('.gallery-image[data-image-url]').forEach(img => {
-                img.addEventListener('click', function() {
-                    const imageUrl = this.getAttribute('data-image-url');
-                    console.log('Clicking gallery image:', imageUrl);
-                    openModal(imageUrl);
+                // Gallery images click
+                galleryImages.forEach((img, galleryIndex) => {
+                    img.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const imageIndex = galleryIndex + 1; // +1 because main image is index 0
+                        console.log('Clicking gallery image', galleryIndex, 'for post', postIndex);
+                        openModal(allPostImages[imageIndex], allPostImages, description, imageIndex);
+                    });
+                    
+                    img.addEventListener('error', function() {
+                        console.log('Gallery image failed to load:', this.src);
+                        this.style.display = 'none';
+                    });
                 });
-                
-                img.addEventListener('error', function() {
-                    console.log('Gallery image failed to load:', this.src);
-                    this.style.display = 'none';
+
+                // Entire card click (for posts without images)
+                card.addEventListener('click', function(e) {
+                    // Only trigger if we didn't click on an image
+                    if (!e.target.closest('.post-image, .gallery-image')) {
+                        if (allPostImages.length > 0) {
+                            console.log('Clicking post card for post', postIndex);
+                            openModal(allPostImages[0], allPostImages, description, 0);
+                        }
+                    }
                 });
             });
         }
@@ -639,7 +854,7 @@
 
         function changePage(direction) {
             const newPage = currentPage + direction;
-            if (newPage >= 1) {
+            if (newPage >= 0) {
                 console.log(`Changing page from ${currentPage} to ${newPage}`);
                 loadPage(newPage);
             }
@@ -649,8 +864,8 @@
             const prevBtn = document.getElementById('prevBtn');
             const nextBtn = document.getElementById('nextBtn');
             
-            // Disable previous button if on page 1
-            prevBtn.disabled = currentPage <= 1;
+            // Disable previous button if on page 0
+            prevBtn.disabled = currentPage <= 0;
             
             // Enable next button (we'll disable it if no results come back)
             nextBtn.disabled = allPosts.length === 0;
@@ -675,15 +890,110 @@
             document.getElementById('error').style.display = 'none';
         }
 
-        function openModal(imageSrc) {
+        let currentImages = [];
+        let currentImageIndex = 0;
+        let currentPostDescription = '';
+
+        function openModal(imageSrc, allImages = [], description = '', startIndex = 0) {
+            console.log('Opening modal with image:', imageSrc);
+            console.log('All images:', allImages);
+            
+            currentImages = allImages.length > 0 ? allImages : [imageSrc];
+            currentImageIndex = startIndex;
+            currentPostDescription = description;
+            
             const modal = document.getElementById('imageModal');
+            if (modal) {
+                updateModalImage();
+                updateThumbnails();
+                modal.style.display = 'flex';
+            }
+        }
+
+        function updateModalImage() {
             const modalImage = document.getElementById('modalImage');
-            modalImage.src = imageSrc;
-            modal.style.display = 'flex';
+            const imageCounter = document.getElementById('imageCounter');
+            const imageDescription = document.getElementById('imageDescription');
+            const prevBtn = document.getElementById('modalPrevBtn');
+            const nextBtn = document.getElementById('modalNextBtn');
+            
+            if (currentImages.length > 0) {
+                const currentImage = currentImages[currentImageIndex];
+                modalImage.src = currentImage;
+                
+                // Update counter
+                imageCounter.textContent = `${currentImageIndex + 1} / ${currentImages.length}`;
+                
+                // Update description
+                imageDescription.textContent = currentPostDescription;
+                
+                // Update navigation buttons
+                prevBtn.disabled = currentImageIndex === 0;
+                nextBtn.disabled = currentImageIndex === currentImages.length - 1;
+                
+                // Hide nav buttons if only one image
+                if (currentImages.length <= 1) {
+                    prevBtn.style.display = 'none';
+                    nextBtn.style.display = 'none';
+                } else {
+                    prevBtn.style.display = 'flex';
+                    nextBtn.style.display = 'flex';
+                }
+                
+                modalImage.onload = function() {
+                    console.log('Modal image loaded successfully');
+                };
+                
+                modalImage.onerror = function() {
+                    console.log('Modal image failed to load');
+                    modalImage.alt = 'Image could not be loaded';
+                };
+            }
+        }
+
+        function updateThumbnails() {
+            const thumbnailStrip = document.getElementById('thumbnailStrip');
+            
+            if (currentImages.length <= 1) {
+                thumbnailStrip.style.display = 'none';
+                return;
+            }
+            
+            thumbnailStrip.style.display = 'flex';
+            thumbnailStrip.innerHTML = currentImages.map((img, index) => `
+                <img src="${img}" 
+                     alt="Thumbnail ${index + 1}" 
+                     class="thumbnail ${index === currentImageIndex ? 'active' : ''}" 
+                     onclick="jumpToImage(${index})">
+            `).join('');
+        }
+
+        function changeModalImage(direction) {
+            const newIndex = currentImageIndex + direction;
+            if (newIndex >= 0 && newIndex < currentImages.length) {
+                currentImageIndex = newIndex;
+                updateModalImage();
+                updateThumbnails();
+            }
+        }
+
+        function jumpToImage(index) {
+            if (index >= 0 && index < currentImages.length) {
+                currentImageIndex = index;
+                updateModalImage();
+                updateThumbnails();
+            }
         }
 
         function closeModal() {
-            document.getElementById('imageModal').style.display = 'none';
+            const modal = document.getElementById('imageModal');
+            if (modal) {
+                modal.style.display = 'none';
+                currentImages = [];
+                currentImageIndex = 0;
+                currentPostDescription = '';
+                console.log('Modal closed');
+            }
         }
 
         // Search functionality
@@ -705,7 +1015,7 @@
         // Page input change handler
         document.getElementById('pageInput').addEventListener('change', function() {
             const newPage = parseInt(this.value);
-            if (newPage && newPage >= 1) {
+            if (newPage >= 0) {
                 loadPage(newPage);
             } else {
                 this.value = currentPage; // Reset to current page if invalid
@@ -716,7 +1026,7 @@
         document.getElementById('pageInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 const newPage = parseInt(this.value);
-                if (newPage && newPage >= 1) {
+                if (newPage >= 0) {
                     loadPage(newPage);
                 } else {
                     this.value = currentPage;
@@ -733,28 +1043,39 @@
 
         // Keyboard navigation
         document.addEventListener('keydown', function(e) {
+            const modal = document.getElementById('imageModal');
+            const isModalOpen = modal.style.display === 'flex';
+            
             if (e.key === 'Escape') {
                 closeModal();
-            } else if (e.key === 'ArrowLeft') {
-                changePage(-1);
-            } else if (e.key === 'ArrowRight') {
-                changePage(1);
+            } else if (isModalOpen) {
+                if (e.key === 'ArrowLeft') {
+                    changeModalImage(-1);
+                } else if (e.key === 'ArrowRight') {
+                    changeModalImage(1);
+                }
+            } else {
+                if (e.key === 'ArrowLeft') {
+                    changePage(-1);
+                } else if (e.key === 'ArrowRight') {
+                    changePage(1);
+                }
             }
         });
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing...');
-            loadPage(1);
+            loadPage(0);
         });
         
         // Backup initialization in case DOMContentLoaded already fired
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', function() {
-                loadPage(1);
+                loadPage(0);
             });
         } else {
-            loadPage(1);
+            loadPage(0);
         }
     </script>
 </body>
